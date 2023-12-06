@@ -1,0 +1,38 @@
+{
+  "name": "dstyler",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "dev": "vitest",
+    "test": "vitest run",
+    "build": "tsup ./src/index.ts",
+    "lint": "tsc",
+    "ci": "pnpm run lint && pnpm run test && pnpm run build"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "keywords": [],
+  "author": "@Oudwins",
+  "license": "MIT",
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.2",
+    "vitest": "^1.0.1"
+  },
+  "dependencies": {
+    "postcss": "^8.4.32"
+  }
+}
