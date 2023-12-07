@@ -1,5 +1,11 @@
-import { describe, expect, it } from "vitest";
-import { walkQuery, getNode, deleteNode } from "./astInterface";
+import { beforeEach, describe, expect, it } from "vitest";
+import {
+  walkQuery,
+  getNode,
+  deleteNode,
+  setNode,
+  createNode,
+} from "./astInterface";
 import * as postcss from "postcss-js";
 import { vi } from "vitest";
 
@@ -44,7 +50,7 @@ describe("Walk Query", () => {
   });
 
   it("Should call the callback function on each layer with the right data", () => {
-    const fn = vi.fn();
+    const fn = vi.fn((a, b, idx) => idx);
     const step2 = {
       type: "rule",
       selector: "body",
@@ -87,6 +93,54 @@ describe("Walk Query", () => {
   });
 });
 
+describe("Create node", () => {
+  const cssObj = {
+    body: {
+      background: "black",
+    },
+    "@media screen and (max-width: 300px)": {
+      body: {
+        background: "red",
+      },
+    },
+  };
+  let ast = postcss.parse(cssObj);
+
+  beforeEach(() => {
+    ast = postcss.parse(cssObj);
+  });
+
+  it("Should insert nodes just before media query nodes", () => {
+    expect(ast.nodes[1]?.type === "atrule").toBe(true);
+
+    createNode(ast, { type: "rule", selector: ".test" });
+
+    expect(ast.nodes[1]?.type === "rule").toBe(true);
+    expect((ast.nodes[1] as any).selector).toBe(".test");
+  });
+
+  it("Should insert nodes at the end inside a media query", () => {
+    // @ts-ignore
+    expect(ast.nodes[1].nodes[1]).toBeUndefined();
+    createNode(ast.nodes[1] as any, { type: "rule", selector: ".testing" });
+    // @ts-ignore
+    expect(ast.nodes[1].nodes[1].selector).toBe(".testing");
+  });
+  it("Should insert media query nodes at the end", () => {
+    //@ts-ignore
+    expect(ast.nodes[2]).toBeUndefined();
+    createNode(ast, {
+      type: "atrule",
+      name: "media",
+      params: "(max-width: 400px)",
+    });
+    //@ts-ignore
+    expect(ast.nodes[2].name).toBe("media");
+    //@ts-ignore
+    expect(ast.nodes[2].params).toBe("(max-width: 400px)");
+  });
+});
+
 describe("Get Node", () => {
   const ast = postcss.parse({
     body: {
@@ -125,5 +179,48 @@ describe("delete node", () => {
     const path = deleteNode([{ type: "rule", selector: ".delete-me" }], ast);
     expect(ast.nodes[2]).toBeUndefined();
     expect(path).toEqual([2]);
+  });
+});
+
+describe("Set Node", () => {
+  let ast = postcss.parse({
+    "@media screen and (max-width: 300px)": {
+      body: {
+        background: "red ",
+      },
+    },
+  });
+
+  beforeEach(() => {
+    ast = postcss.parse({
+      "@media screen and (max-width: 300px)": {
+        body: {
+          background: "red ",
+        },
+      },
+    });
+  });
+
+  it("Should set the selected node's children to the value, replacing the previous values", () => {
+    setNode(
+      [
+        {
+          type: "atrule",
+          name: "media",
+          params: "screen and (max-width: 300px)",
+        },
+        { type: "rule", selector: "body" },
+      ],
+      { color: "red" },
+      ast
+    );
+
+    const res = postcss.parse({ color: "red" });
+    //@ts-expect-error
+    expect(ast.nodes[0].nodes[0].nodes).toEqual(res.nodes);
+  });
+
+  it.skip("Should return the path and the diff if appropriate", () => {
+    //
   });
 });
