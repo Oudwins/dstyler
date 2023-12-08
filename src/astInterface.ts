@@ -1,5 +1,6 @@
 import * as postcss from "postcss-js";
 import { Diff, diffProps } from "./astDiffer";
+import { arrayToObject } from "./utils";
 
 export type AST = ReturnType<typeof postcss.parse>;
 export type ASTNodes = AST["nodes"];
@@ -9,49 +10,115 @@ export type ruleQuery = { type: "rule"; selector: string };
 export type QueryItem = atRuleQuery | ruleQuery;
 export type Query = QueryItem[];
 
-export function walkQuery(
-  query: Query,
+export function queryWalker(
+  path: string[],
   ast: AST,
-  callback?: (curRoot: AST, step: QueryItem, idx: number) => number
+  callback?: (v: {
+    nodeIdx: number;
+    step: string;
+    stepIdx: number;
+    curRoot: AST;
+  }) => boolean
 ) {
-  let curRoot = ast;
+  const v = {
+    nodeIdx: -1,
+    step: "",
+    stepIdx: -1,
+    curRoot: ast,
+  };
+  for (const [i, step] of path.entries()) {
+    v.step = step;
+    v.stepIdx = i;
+    if (step.startsWith("@")) {
+      // at rule
+      const spaceIdx = step.indexOf(" ");
+      const atRule = step.substring(1, spaceIdx);
+      const params = step.substring(spaceIdx + 1);
 
-  let idx = -1;
-  for (const step of query) {
-    switch (step.type) {
-      case "atrule":
-        if (step.name === "media") {
-          //@ts-expect-error
-          idx = curRoot.nodes.findLastIndex(
-            //@ts-expect-error
-            (n) => {
-              return n.name === step.name && n.params === step.params;
-            }
-          );
-        } else {
-          // TODO the rest of the atRule types
+      // @media
+      //@ts-expect-error
+      v.nodeIdx = v.curRoot.nodes.findLastIndex(
+        //@ts-expect-error
+        (n) => {
+          console.log(n.name, n.params);
+          return n.name === atRule && n.params === params;
         }
-        break;
-      case "rule":
-        idx = curRoot.nodes.findIndex(
-          //@ts-expect-error
-          (n) => n.selector === step.selector
-        );
-        break;
-      default:
-        throw new Error("Invalid query step type");
-    }
-    if (callback) {
-      idx = callback(curRoot, step, idx);
+      );
+    } else {
+      // selector
+      v.nodeIdx = v.curRoot.nodes.findIndex(
+        //@ts-expect-error
+        (n) => n.selector === step
+      );
     }
 
-    if (idx < 0)
-      throw new Error("Something wen't wrong walking query. Invalid index");
+    if (callback) {
+      if (callback(v)) {
+        break;
+      }
+    }
+
+    if (v.nodeIdx < 0)
+      throw new Error(
+        "Something wen't wrong walking query. Couldn't find node."
+      );
     //@ts-expect-error
-    curRoot = curRoot.nodes[idx];
+    v.curRoot = v.curRoot.nodes[v.nodeIdx];
   }
 
-  return curRoot;
+  return v.curRoot;
+}
+
+export function setNode(qpath: string[], values: postcss.CssInJs, ast: AST) {
+  const path: number[] = [];
+  const diff: Diff[] = [];
+  const n = queryWalker(qpath, ast, (v) => {
+    if (v.nodeIdx < 0) {
+      // node does not exist
+      const pn = arrayToObject(qpath.slice(v.stepIdx), values);
+      // I have to parse the new node
+      const parentNode: any = postcss.parse(pn).nodes[0];
+
+      if (parentNode.nodes.length === 0 || parentNode.name === "media") {
+        v.curRoot.append(parentNode);
+        path.push(v.curRoot.nodes.length - 1);
+      } else {
+        // I have to insert it into the curRoot
+        if (parentNode?.type === "atrule") {
+          // TODO add support for non media atrules
+          throw new Error("Only media queries currently supported");
+        } else {
+          // selector
+          let siblingIdx = 0;
+          for (let i = v.curRoot.nodes.length - 1; i >= 0; i--) {
+            if ((v.curRoot.nodes[i] as any).name !== "media") {
+              siblingIdx = i;
+              break;
+            }
+          }
+
+          path.push(siblingIdx + 1);
+          v.curRoot.insertAfter(v.curRoot.nodes[siblingIdx] as any, parentNode);
+        }
+      }
+      // I have to create a raw diff
+      diff.push({ type: "raw", path, value: parentNode.toString() });
+
+      // stops walker
+      return true;
+    }
+    path.push(v.nodeIdx);
+
+    return false;
+  });
+
+  if (diff.length > 0) {
+    return diff;
+  }
+
+  // handle case no created nodes. Only updated properties.
+  // use the node
+  return diff;
 }
 
 export function getNode(query: Query, ast: AST) {
@@ -68,73 +135,8 @@ export function deleteNode(query: Query, ast: AST) {
   return path;
 }
 
-export function setNode(query: Query, values: postcss.CssInJs, ast: AST) {
-  const path: number[] = [];
-  const n = walkQuery(query, ast, (curRoot, step, idx) => {
-    if (idx < 0) {
-      path.push(createNode(curRoot, step));
-      return path[path.length - 1] as number;
-    }
-    return idx;
-  });
-
-  const diff: Diff[] = [];
-  const nn = postcss.parse(values);
-  if (query[query.length - 1]?.type === "rule") {
-    diffProps(n.nodes, nn.nodes, diff);
-  } else {
-    diff.push({
-      type: "raw",
-      value: postcss
-        .parse({
-          [parseQueryTocssSelector(query[query.length - 1] as any)]: values,
-        })
-        .toString(),
-    });
-  }
-  n.nodes = nn.nodes;
-
-  return { path, diff };
-}
-
-export function parseQueryTocssSelector(queryItem: QueryItem) {
-  if (queryItem.type === "rule") {
-    return queryItem.selector;
-  } else {
-    return `@${queryItem.name} ${queryItem.params}`;
-  }
-}
-
-// TODO find a way of doing this in a more efficient manner. Rather than iterating, if we find a node that doesn't exist we should just create the entire tree. Which means we need to convert our query into a js object and parse it with postcss?
-export function createNode(curRoot: AST, step: QueryItem) {
-  let node: postcss.CssInJs | null = null;
-  let nIdx = 0;
-  switch (step.type) {
-    case "rule":
-      node = {};
-      node[step.selector] = {};
-
-      // walk nodes backwards trying to find first non media query node
-      for (let i = curRoot.nodes.length - 1; i >= 0; i--) {
-        if ((curRoot.nodes[i] as any).name !== "media") {
-          nIdx = i;
-          break;
-        }
-      }
-      if (!node) throw new Error("Failed at creating new node");
-      const r1 = postcss.parse(node);
-      curRoot.insertAfter(curRoot.nodes[nIdx] as any, r1.nodes);
-      break;
-    case "atrule":
-      node = {};
-      node[`@${step.name} ${step.params}`] = {};
-      nIdx = curRoot.nodes.length;
-      if (!node) throw new Error("Failed at creating new node");
-      const r2 = postcss.parse(node);
-      curRoot.append(r2.nodes);
-      break;
-  }
-  return nIdx;
+export function addToNode() {
+  // problem 1: I can't just append the nodes I have to check that they do not currently exist and not do anything if they exist. Because otherwise even for properties it will just append multiple duplicates
 }
 
 export default {
