@@ -7,7 +7,7 @@ export type DiffProperties = {
   type: "properties";
   value: { [k in string]: string | null };
 };
-export type DiffRaw = { type: "raw"; value: string };
+export type DiffRaw = { type: "raw"; path: number[]; value: string };
 
 export type Diff = DiffNode | DiffProperties | DiffRaw;
 
