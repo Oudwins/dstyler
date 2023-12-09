@@ -115,25 +115,17 @@ export function setNode(qpath: string[], values: postcss.CssInJs, ast: AST) {
   if (diff.length > 0) {
     return diff;
   }
+  // handle case no created nodes in qpath. Only updated nodes for a node.
+  // all nodes in qpath exist
+  const nn = postcss.parse(values);
+  // note this can have other nodes inside it.....
 
-  // handle case no created nodes. Only updated properties.
-  // use the node
   return diff;
 }
 
-export function getNode(query: Query, ast: AST) {
-  return walkQuery(query, ast);
-}
+export function getNode(query: Query, ast: AST) {}
 
-export function deleteNode(query: Query, ast: AST) {
-  const path: number[] = [];
-  const n = walkQuery(query, ast, (curRoot, step, idx) => {
-    path.push(idx);
-    return idx;
-  });
-  n.remove();
-  return path;
-}
+export function deleteNode(query: Query, ast: AST) {}
 
 export function addToNode() {
   // problem 1: I can't just append the nodes I have to check that they do not currently exist and not do anything if they exist. Because otherwise even for properties it will just append multiple duplicates
