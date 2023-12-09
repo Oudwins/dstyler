@@ -1,6 +1,6 @@
 import { objectify } from "postcss-js";
-import createDynamicStylesheet from "./createDynamicStylesheet";
+import type { DynamicStylesheet } from "./types";
 
-export function dsToJson(ds: ReturnType<typeof createDynamicStylesheet>) {
+export function dsToJson(ds: DynamicStylesheet) {
   return objectify(ds._ast);
 }

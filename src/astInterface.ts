@@ -19,7 +19,7 @@ export function queryWalker(
     stepIdx: number;
     curRoot: AST;
   }) => boolean
-) {
+): any {
   const v = {
     nodeIdx: -1,
     step: "",

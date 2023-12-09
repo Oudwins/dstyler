@@ -1,16 +1,11 @@
 import * as postcss from "postcss-js";
 import createDomInterface from "./createDomInterface";
-import astInterface, { Query } from "./astInterface";
-
-export default createDynamicStyleSheetHandlerFactory(
-  createDomInterface,
-  astInterface
-);
+import astInterface from "./astInterface";
 
 export function createDynamicStyleSheetHandlerFactory(
   createSS: typeof createDomInterface,
   astUtils: typeof astInterface
-) {
+): any {
   return function createDynamicStyleSheetHandler(
     id: string,
     initialState?: postcss.CssInJs,
@@ -27,27 +22,22 @@ export function createDynamicStyleSheetHandlerFactory(
     let qpath: string[] = [];
     return {
       media(rule: string) {
-        // query.push({ type: "atrule", name: "media", params: rule });
         const selector = "@media " + rule;
         qpath.push(selector);
         return this;
       },
       selector(s: string) {
-        // query.push({ type: "rule", selector: s });
         const selector = s;
         qpath.push(s);
         return this;
       },
       set(values: postcss.CssInJs) {
-        // const { qpath, diff } = astInterface.setNode(query, values, ast);
-        // ss.setNode(qpath, query, diff);
-        // query = [];
         const diffs = astInterface.setNode(qpath, values, ast);
         qpath = [];
         ss.processDiffs(diffs);
       },
       _ast: ast,
-      _ss: ss.ss,
+      _ssInterface: ss,
     };
   };
 }
