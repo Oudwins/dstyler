@@ -1,6 +1,6 @@
 # Dstyler - Dynamic Stylesheets
 
-Small package for working with dynamic stylesheets. Create, Remove, Update and Delete css styles dynamically.
+Small package for working with dynamic stylesheets powered by [postcss](https://github.com/postcss/postcss). Create, Remove, Update and Delete css styles dynamically.
 
 Dstyler should be particularly useful if you are creating a page builder or some other service where you want to allow a user to be able to access the full power of CSS.
 
@@ -84,8 +84,21 @@ ds.selector("div").set({
   "font-size": "16px",
 }); // css is created in global scope div {background: 'red'; color: "white"; font-size: "16px"}
 ds.selector("div").set({ background: "blue", color: "white" }); // only background is changed to blue and font-sized removed so result is div {background: "blue"; color: "white"}
+ds.selector("div").set({ background: "blue", color: "white" }); // css is not updated. "nothing" is done
 
 ds.media("(max-width: 300px)").set({ div: { background: "red" } }); // NOT RECOMENDED
+```
+
+### Storing and Recovering the css
+
+```js
+import { dsToJson, createDynamicStylesheet } from "dstyler";
+
+const jsonCSS = dsToJson(ds); // returns a json string that can be stored anywhere. This json string is a postcss AST. You may use it with postcss to create a css file.
+
+const ds = createDynamicStylesheet("id", JSON.parse(jsonCSS), document); // restored css
+
+const cssString = ds._ast.toString(); // returns entire stylesheet as a css string
 ```
 
 ## Future improvements
