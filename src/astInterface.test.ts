@@ -56,6 +56,7 @@ describe.skip("Get Node", () => {
 });
 
 describe.skip("delete node", () => {
+  // todo
   const ast = postcss.parse({
     body: {
       background: "black",
