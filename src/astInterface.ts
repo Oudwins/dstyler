@@ -1,5 +1,5 @@
 import * as postcss from "postcss-js";
-import { Diff, diffProps } from "./astDiffer";
+import { Diff } from "./astDiffer";
 import { arrayToObject } from "./utils";
 
 export type AST = ReturnType<typeof postcss.parse>;
