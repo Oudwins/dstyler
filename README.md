@@ -89,6 +89,12 @@ ds.selector("div").set({ background: "blue", color: "white" }); // css is not up
 ds.media("(max-width: 300px)").set({ div: { background: "red" } }); // NOT RECOMENDED
 ```
 
+Get: Returns a css in js object for the nodes selected;
+
+```js
+ds.selector("div").get(); // {div: {background: "red"}}
+```
+
 ### Storing and Recovering the css
 
 ```js
