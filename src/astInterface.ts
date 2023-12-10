@@ -125,7 +125,19 @@ export function getNode(qpath: string[], ast: AST) {
   return n;
 }
 
-export function deleteNode(qpath: string[], ast: AST) {}
+export function removeNode(qpath: string[], ast: AST) {
+  const path: number[] = [];
+
+  const n = queryWalker(qpath, ast, (v) => {
+    path.push(v.nodeIdx);
+    return false;
+  });
+
+  n.remove();
+
+  const diff: Diff[] = [{ type: "node", path, value: null }];
+  return diff;
+}
 
 export function addToNode() {
   // problem 1: I can't just append the nodes I have to check that they do not currently exist and not do anything if they exist. Because otherwise even for properties it will just append multiple duplicates
@@ -133,6 +145,6 @@ export function addToNode() {
 
 export default {
   getNode,
-  deleteNode,
   setNode,
+  removeNode,
 };
