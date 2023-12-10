@@ -45,6 +45,11 @@ export function createDynamicStyleSheetHandlerFactory(
         return postcss.objectify(n);
         reset();
       },
+      delete() {
+        const diff = astInterface.removeNode(qpath, ast);
+        ss.processDiffs(diff);
+        reset();
+      },
       _ast: ast,
       _ssInterface: ss,
     };

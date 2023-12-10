@@ -74,6 +74,12 @@ ds.selector("css selector"); // .class, #id....
 
 **Action methods**
 
+Get: Returns a css in js object for the nodes selected;
+
+```js
+ds.selector("div").get(); // {div: {background: "red"}}
+```
+
 Set: sets the node to the provided value
 The set function may be used to set nodes but this is not recomended as it may lead to unsupported behaviours -> ds.set({"div": {background: "red"}})
 
@@ -89,10 +95,11 @@ ds.selector("div").set({ background: "blue", color: "white" }); // css is not up
 ds.media("(max-width: 300px)").set({ div: { background: "red" } }); // NOT RECOMENDED
 ```
 
-Get: Returns a css in js object for the nodes selected;
+Delete: delete a node and its child nodes
 
 ```js
-ds.selector("div").get(); // {div: {background: "red"}}
+ds.selector("div").delete(); // deletes div{background: "red"}
+ds.media("(max-width: 300px)").delete(); //deletes media query & all nodes inside it!
 ```
 
 ### Storing and Recovering the css
