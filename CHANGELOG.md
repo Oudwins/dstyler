@@ -1,5 +1,12 @@
 # dstyler
 
+## 0.0.4
+
+### Patch Changes
+
+- edbbda3: Implemented delete & fixed properties diff not working
+- 0405b4b: Fixed CI? publish to npm?
+
 ## 0.0.3
 
 ### Patch Changes
