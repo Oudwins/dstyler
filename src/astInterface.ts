@@ -5,10 +5,6 @@ import { arrayToObject } from "./utils";
 export type AST = ReturnType<typeof postcss.parse>;
 export type ASTNodes = AST["nodes"];
 export type ASTNode = ASTNodes extends (infer U)[] ? U : never;
-export type atRuleQuery = { type: "atrule"; name: string; params: string };
-export type ruleQuery = { type: "rule"; selector: string };
-export type QueryItem = atRuleQuery | ruleQuery;
-export type Query = QueryItem[];
 
 export function queryWalker(
   path: string[],
@@ -123,9 +119,13 @@ export function setNode(qpath: string[], values: postcss.CssInJs, ast: AST) {
   return diff;
 }
 
-export function getNode(query: Query, ast: AST) {}
+export function getNode(qpath: string[], ast: AST) {
+  const n = queryWalker(qpath, ast);
 
-export function deleteNode(query: Query, ast: AST) {}
+  return n;
+}
+
+export function deleteNode(qpath: string[], ast: AST) {}
 
 export function addToNode() {
   // problem 1: I can't just append the nodes I have to check that they do not currently exist and not do anything if they exist. Because otherwise even for properties it will just append multiple duplicates
