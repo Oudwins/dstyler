@@ -1,5 +1,11 @@
 # dstyler
 
+## 0.0.5
+
+### Patch Changes
+
+- b4ba81a: Fixed ci finally?
+
 ## 0.0.4
 
 ### Patch Changes
