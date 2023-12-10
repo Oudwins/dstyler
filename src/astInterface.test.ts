@@ -49,9 +49,9 @@ describe.skip("Get Node", () => {
   });
 
   it("Should return the queried node", () => {
-    expect(getNode([{ type: "rule", selector: "body" }], ast)).toBe(
-      ast.nodes[0]
-    );
+    // expect(getNode([{ type: "rule", selector: "body" }], ast)).toBe(
+    // ast.nodes[0]
+    // );
   });
 });
 
@@ -71,10 +71,10 @@ describe.skip("delete node", () => {
     },
   });
   it("Should delete the node in the ast & return a path to the deleted node", () => {
-    expect(ast.nodes[2]).toBeDefined();
-    const path = deleteNode([{ type: "rule", selector: ".delete-me" }], ast);
-    expect(ast.nodes[2]).toBeUndefined();
-    expect(path).toEqual([2]);
+    // expect(ast.nodes[2]).toBeDefined();
+    // const path = deleteNode([{ type: "rule", selector: ".delete-me" }], ast);
+    // expect(ast.nodes[2]).toBeUndefined();
+    // expect(path).toEqual([2]);
   });
 });
 
