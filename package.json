@@ -2,7 +2,6 @@
   "name": "dstyler",
   "version": "0.0.5",
   "description": "",
-  "private": "false",
   "scripts": {
     "dev": "vitest",
     "test": "vitest run",
