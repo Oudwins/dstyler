@@ -1,5 +1,11 @@
 # dstyler
 
+## 0.0.3
+
+### Patch Changes
+
+- a8c461f: Fixing ci & adding get method
+
 ## 0.0.2
 
 ### Patch Changes
