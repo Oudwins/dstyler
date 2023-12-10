@@ -1,5 +1,11 @@
 # dstyler
 
+## 0.0.6
+
+### Patch Changes
+
+- d8a3f13: Fixing ci changeset?
+
 ## 0.0.5
 
 ### Patch Changes
