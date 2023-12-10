@@ -36,6 +36,10 @@ export function createDynamicStyleSheetHandlerFactory(
         qpath = [];
         ss.processDiffs(diffs);
       },
+      get() {
+        const n = astInterface.getNode(qpath, ast);
+        return postcss.objectify(n);
+      },
       _ast: ast,
       _ssInterface: ss,
     };
