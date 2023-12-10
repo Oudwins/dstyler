@@ -20,6 +20,10 @@ export function createDynamicStyleSheetHandlerFactory(
     });
 
     let qpath: string[] = [];
+    function reset() {
+      qpath = [];
+    }
+
     return {
       media(rule: string) {
         const selector = "@media " + rule;
@@ -33,12 +37,13 @@ export function createDynamicStyleSheetHandlerFactory(
       },
       set(values: postcss.CssInJs) {
         const diffs = astInterface.setNode(qpath, values, ast);
-        qpath = [];
         ss.processDiffs(diffs);
+        reset();
       },
       get() {
         const n = astInterface.getNode(qpath, ast);
         return postcss.objectify(n);
+        reset();
       },
       _ast: ast,
       _ssInterface: ss,
