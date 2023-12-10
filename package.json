@@ -9,7 +9,7 @@
     "build": "tsup ./src/index.ts",
     "lint": "tsc",
     "ci": "pnpm run lint && pnpm run test && pnpm run build",
-    "release": "pnpm run lint && pnpm run test && pnpm run build && changeset publish"
+    "release": "pnpm run lint && pnpm run test && pnpm run build && pnpm changeset publish"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
