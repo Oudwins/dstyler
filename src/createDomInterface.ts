@@ -42,6 +42,34 @@ export default function createDomInterface({
                 curRoot = curRoot.cssRules[step] as any;
               }
             }
+            break;
+          case "node":
+            for (let i = 0; i < d.path.length - 1; i++) {
+              if (!curRoot.cssRules[d.path[i] as number]) {
+                curRoot.insertRule(d.value as string, d.path[i]);
+                break;
+              } else {
+                curRoot = curRoot.cssRules[d.path[i] as number] as any;
+              }
+            }
+            const last = d.path[d.path.length - 1] as number;
+            if (!d.value) {
+              curRoot.deleteRule(last);
+            } else {
+              curRoot.insertRule(d.value as string, last);
+            }
+            break;
+
+          case "properties":
+            for (let step of d.path) {
+              curRoot = curRoot.cssRules[step] as any;
+            }
+            for (const [key, val] of Object.entries(d.value)) {
+              //@ts-ignore
+              curRoot.style[key] = val || "";
+            }
+
+            break;
         }
       }
     },
