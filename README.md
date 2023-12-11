@@ -29,7 +29,7 @@ const ds = createDynamicStylesheet("stylesheet id", initialState, document);
 ds.media("(min-width: 640px)")
   .selector(".my-mobile-class")
   .set({ background: "red" });
-// The set function may be used to set nodes but this is not recomended as it may lead to unsupported behaviours -> ds.set({"div": {background: "red"}})
+// The set function may be used to set nodes but this is not recomended as it may lead to unexpected  behaviour (you may break the stylesheet if not careful) -> ds.set({"div": {background: "red"}})
 ```
 
 ## A word of warning!
@@ -92,7 +92,7 @@ ds.selector("div").set({
 ds.selector("div").set({ background: "blue", color: "white" }); // only background is changed to blue and font-sized removed so result is div {background: "blue"; color: "white"}
 ds.selector("div").set({ background: "blue", color: "white" }); // css is not updated. "nothing" is done
 
-ds.media("(max-width: 300px)").set({ div: { background: "red" } }); // NOT RECOMENDED
+ds.media("(max-width: 300px)").set({ div: { background: "red" } }); // NOT RECOMENDED. May lead to unexpected behaviour.
 ```
 
 Delete: delete a node and its child nodes
@@ -117,3 +117,4 @@ const cssString = ds._ast.toString(); // returns entire stylesheet as a css stri
 ## Future improvements
 
 - improve diffing algorithm to delete nodes if no children
+- found bug, set is not working correctly on the stylesheet but yes on the ast & it doesn't work on ast to update it....
