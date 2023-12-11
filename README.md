@@ -8,7 +8,7 @@ Dstyler is "kind of" like the react of stylesheets. To avoid unnecesary dom upda
 
 ## Getting Started
 
-Install dstyler
+Install dstyler via [npm](https://www.npmjs.com/package/dstyler)
 
 ```bash
 npm i dstyler
@@ -114,7 +114,14 @@ const ds = createDynamicStylesheet("id", JSON.parse(jsonCSS), document); // rest
 const cssString = ds._ast.toString(); // returns entire stylesheet as a css string
 ```
 
+## Thank You's & Maintenance
+
+Big thank you to @prevwong the maintainer of [craftjs](https://github.com/prevwong/craft.js) for a conversation which led me to the idea for this library.
+
+It is maintained by me @Oudwins. Feel free to open an issue, PR or get in touch with me through [my site](https://tristanmayo.com/)
+
 ## Future improvements
 
 - improve diffing algorithm to delete nodes if no children
-- found bug, set is not working correctly on the stylesheet but yes on the ast & it doesn't work on ast to update it....
+- Implement react hook that is compatible with react-frame-component
+-
