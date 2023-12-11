@@ -114,14 +114,16 @@ const ds = createDynamicStylesheet("id", JSON.parse(jsonCSS), document); // rest
 const cssString = ds._ast.toString(); // returns entire stylesheet as a css string
 ```
 
-## Thank You's & Maintenance
-
-Big thank you to @prevwong the maintainer of [craftjs](https://github.com/prevwong/craft.js) for a conversation which led me to the idea for this library.
-
-It is maintained by me @Oudwins. Feel free to open an issue, PR or get in touch with me through [my site](https://tristanmayo.com/)
-
 ## Future improvements
 
 - improve diffing algorithm to delete nodes if no children
 - Implement react hook that is compatible with react-frame-component
 -
+
+## Thank You's & Maintenance
+
+Big thank you to @prevwong the maintainer of [craftjs](https://github.com/prevwong/craft.js) for a conversation which led me to the idea for this library.
+
+It is maintained by me @Oudwins as part of my work to develop a website builder for [Ridaly](https://ridaly.com/). Feel free contribute through the [github](https://github.com/Oudwins/dstyler), open an issue or a PR.
+
+If you need to get in touch with me you can do so through [my site](https://tristanmayo.com/)
