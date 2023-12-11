@@ -34,7 +34,7 @@ ds.media("(min-width: 640px)")
 
 ## A word of warning!
 
-This is a very early library, the api's might change fast. I am currently working on adding a few more method and react support.
+This is a very early library, the api's might change fast. I am currently working on adding a few more methods and react support.
 
 ## API
 
