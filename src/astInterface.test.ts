@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { queryWalker, getNode, setNode } from "./astInterface";
+import { queryWalker, getNode, setNode, removeNode } from "./astInterface";
 import * as postcss from "postcss-js";
 import { vi } from "vitest";
 
@@ -36,7 +36,7 @@ describe("Query Walker", () => {
   });
 });
 
-describe.skip("Get Node", () => {
+describe("Get Node", () => {
   const ast = postcss.parse({
     body: {
       background: "black",
@@ -48,33 +48,58 @@ describe.skip("Get Node", () => {
     },
   });
 
-  it("Should return the queried node", () => {
-    // expect(getNode([{ type: "rule", selector: "body" }], ast)).toBe(
-    // ast.nodes[0]
-    // );
+  it("Should return the queried node nested or not", () => {
+    expect(getNode(["body"], ast)).toBe(ast.nodes[0]);
+    expect(getNode(["@media screen and (max-width: 300px)", "body"], ast)).toBe(
+      // @ts-ignore
+      ast.nodes[1].nodes[0]
+    );
   });
 });
 
-describe.skip("delete node", () => {
-  // todo
-  const ast = postcss.parse({
-    body: {
-      background: "black",
-    },
-    "@media screen and (max-width: 300px)": {
+describe("Remove Node", () => {
+  let ast: any = null;
+  beforeEach(() => {
+    ast = postcss.parse({
       body: {
+        background: "black",
+      },
+      ".delete-me": {
         background: "red",
       },
-    },
-    ".delete-me": {
-      background: "red",
-    },
+      "@media screen and (max-width: 300px)": {
+        body: {
+          background: "red",
+        },
+      },
+      "@media (max-width: 400px)": {
+        body: {
+          background: "red",
+        },
+      },
+    });
   });
-  it("Should delete the node in the ast & return a path to the deleted node", () => {
-    // expect(ast.nodes[2]).toBeDefined();
-    // const path = deleteNode([{ type: "rule", selector: ".delete-me" }], ast);
-    // expect(ast.nodes[2]).toBeUndefined();
-    // expect(path).toEqual([2]);
+  it("Should delete a node in the ast & return a diff", () => {
+    expect(ast.nodes[1].selector).toBe(".delete-me");
+    const diff = removeNode([".delete-me"], ast);
+    expect(ast.nodes[1].type).toBe("atrule");
+    expect(diff).toEqual([{ type: "node", path: [1], value: null }]);
+  });
+
+  it("Should be able to remove nested nodes & return a diff", () => {
+    expect(ast.nodes[2].nodes[0]).toBeDefined();
+    const diff = removeNode(
+      ["@media screen and (max-width: 300px)", "body"],
+      ast
+    );
+    expect(ast.nodes[2].nodes[0]).toBeUndefined();
+    expect(diff).toEqual([{ type: "node", path: [2, 0], value: null }]);
+  });
+  it("Should be able to remove media @rules", () => {
+    expect(ast.nodes[2].params).toBe("screen and (max-width: 300px)");
+    const diff = removeNode(["@media screen and (max-width: 300px)"], ast);
+    expect(ast.nodes[2].params).toBe("(max-width: 400px)");
+    expect(diff).toEqual([{ type: "node", path: [2], value: null }]);
   });
 });
 
