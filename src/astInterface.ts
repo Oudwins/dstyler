@@ -92,9 +92,16 @@ export function setNode(qpath: string[], values: postcss.CssInJs, ast: AST) {
               break;
             }
           }
-
-          path.push(siblingIdx + 1);
-          v.curRoot.insertAfter(v.curRoot.nodes[siblingIdx] as any, parentNode);
+          if (v.curRoot.nodes.length > 0) {
+            path.push(siblingIdx + 1);
+            v.curRoot.insertAfter(
+              v.curRoot.nodes[siblingIdx] as any,
+              parentNode
+            );
+          } else {
+            path.push(siblingIdx);
+            v.curRoot.append(parentNode);
+          }
         }
       }
       // I have to create a raw diff

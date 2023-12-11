@@ -149,11 +149,29 @@ describe("Set Node", () => {
         background: "blue",
       },
     };
+    expect(ast.nodes[1].type).toBe("atrule");
     const diff = setNode([".myTest"], node[".myTest"], ast);
+    expect(diff.length).toBe(1);
     expect(diff[0]?.type).toBe("raw");
     expect(diff[0]?.path).toEqual([1]);
     expect(normalizeString(diff[0]?.value)).toEqual(
       normalizeString(postcss.parse(node).toString())
+    );
+    expect(ast.nodes[1].selector).toBe(".myTest");
+  });
+  it("Should be able to create a new node even if tree is empty", () => {
+    const ast = postcss.parse({});
+    const newN = {
+      ".test": {
+        background: "red",
+      },
+    };
+    const diff = setNode([".test"], newN[".test"], ast);
+    expect(diff.length).toBe(1);
+    expect(diff[0]?.type).toBe("raw");
+    expect(diff[0]?.path).toEqual([0]);
+    expect(normalizeString(diff[0]?.value)).toEqual(
+      normalizeString(postcss.parse(newN).toString())
     );
   });
 });
