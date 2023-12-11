@@ -36,6 +36,9 @@ describe("Query Walker", () => {
   });
 });
 
+function normalizeString(s: any) {
+  return s.replaceAll(" ", "").replaceAll("\n", "");
+}
 describe("Get Node", () => {
   const ast = postcss.parse({
     body: {
@@ -103,18 +106,16 @@ describe("Remove Node", () => {
   });
 });
 
-describe.skip("Set Node", () => {
-  let ast = postcss.parse({
-    "@media screen and (max-width: 300px)": {
-      body: {
-        background: "red ",
-      },
-    },
-  });
-
+describe("Set Node", () => {
+  let ast: any;
   beforeEach(() => {
     ast = postcss.parse({
-      "@media screen and (max-width: 300px)": {
+      div: {
+        background: "red",
+        color: "red",
+        "z-index": "10",
+      },
+      "@media (max-width: 300px)": {
         body: {
           background: "red ",
         },
@@ -122,25 +123,37 @@ describe.skip("Set Node", () => {
     });
   });
 
-  it("Should set the selected node's children to the value, replacing the previous values", () => {
-    // setNode(
-    //   [
-    //     {
-    //       type: "atrule",
-    //       name: "media",
-    //       params: "screen and (max-width: 300px)",
-    //     },
-    //     { type: "rule", selector: "body" },
-    //   ],
-    //   { color: "red" },
-    //   ast
-    // );
-    // const res = postcss.parse({ color: "red" });
-    // //@ts-expect-error
-    // expect(ast.nodes[0].nodes[0].nodes).toEqual(res.nodes);
+  it("Should Create Update and Delete style properties", () => {
+    const diff = setNode(
+      ["div"],
+      { background: "blue", color: "red", margin: "10px" },
+      ast
+    );
+
+    expect(diff).toEqual([
+      {
+        type: "properties",
+        path: [0],
+        value: {
+          background: "blue",
+          "z-index": null,
+          margin: "10px",
+        },
+      },
+    ]);
   });
 
-  it.skip("Should return the path and the diff if appropriate", () => {
-    //
+  it("Should create new node/s if no node with selector exists", () => {
+    const node = {
+      ".myTest": {
+        background: "blue",
+      },
+    };
+    const diff = setNode([".myTest"], node[".myTest"], ast);
+    expect(diff[0]?.type).toBe("raw");
+    expect(diff[0]?.path).toEqual([1]);
+    expect(normalizeString(diff[0]?.value)).toEqual(
+      normalizeString(postcss.parse(node).toString())
+    );
   });
 });

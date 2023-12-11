@@ -1,5 +1,5 @@
 import * as postcss from "postcss-js";
-import { Diff } from "./astDiffer";
+import { Diff, astDiff } from "./astDiffer";
 import { arrayToObject } from "./utils";
 
 export type AST = ReturnType<typeof postcss.parse>;
@@ -114,7 +114,9 @@ export function setNode(qpath: string[], values: postcss.CssInJs, ast: AST) {
   // handle case no created nodes in qpath. Only updated nodes for a node.
   // all nodes in qpath exist
   const nn = postcss.parse(values);
-  // note this can have other nodes inside it.....
+  // WARNING THIS IMPLEMENTATION WILL RESULT IN SS BEING OUT OF SYCH IF nn.nodes ARE IN DIFFERENT ORDER FROM n.nodes (in the case where they are not properties)
+  // TODO fix this?
+  astDiff(n.nodes, nn.nodes, path, diff);
 
   return diff;
 }
