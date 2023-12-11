@@ -1,5 +1,11 @@
 # dstyler
 
+## 0.1.0
+
+### Minor Changes
+
+- f4d8201: Working prototype for dstyler. Set, get & delete correctly implemented with tests and working
+
 ## 0.0.6
 
 ### Patch Changes
