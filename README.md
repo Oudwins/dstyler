@@ -1,10 +1,10 @@
 # Dstyler - Dynamic Stylesheets
 
-Small package for working with dynamic stylesheets powered by [postcss](https://github.com/postcss/postcss). Create, Remove, Update and Delete css styles dynamically.
+Dstyler aims to provide a very simple and intuitive API to work with the little known Stylesheet browser API to create stylesheets that react to user input. Create, Remove, Update and Delete css styles,classes and media queries dynamically.
 
 Dstyler should be particularly useful if you are creating a page builder or some other service where you want to allow a user to be able to access the full power of CSS.
 
-Dstyler is "kind of" like the react of stylesheets. To avoid unnecesary dom updates we mantain a virtual cssom and only update it when necesary. Minimizing dom updates & screen rerenders.
+Dstyler is "kind of" like the react of stylesheets. To avoid unnecesary dom updates we mantain a virtual cssom (powered by [postcss](https://github.com/postcss/postcss)) and only update it when necesary. Minimizing dom updates & screen rerenders.
 
 ## Getting Started
 
@@ -56,6 +56,8 @@ export interface DynamicStylesheet {
   media: (params: string) => this;
   selector: (cssSelector: string) => this;
   set: (values: cssInJs) => void;
+  delete: () => void;
+  get: () => cssInJs;
   _ast: any;
   _ssInterface: any;
 }

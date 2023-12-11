@@ -4,6 +4,8 @@ export interface DynamicStylesheet {
   media: (params: string) => this;
   selector: (cssSelector: string) => this;
   set: (values: cssInJs) => void;
+  delete: () => void;
+  get: () => cssInJs;
   _ast: any;
   _ssInterface: any;
 }
