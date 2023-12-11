@@ -1,5 +1,11 @@
 # dstyler
 
+## 0.1.1
+
+### Patch Changes
+
+- ac66119: Fixed docs types & other minor changes
+
 ## 0.1.0
 
 ### Minor Changes
