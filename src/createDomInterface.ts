@@ -34,28 +34,21 @@ export default function createDomInterface({
         let curRoot = ss;
         switch (d.type) {
           case "raw":
-            for (let step of d.path) {
-              if (!curRoot.cssRules[step]) {
-                curRoot.insertRule(d.value, step);
-                break;
-              } else {
-                curRoot = curRoot.cssRules[step] as any;
-              }
+            for (let i = 0; i < d.path.length - 1; i++) {
+              curRoot = curRoot.cssRules[d.path[i] as number] as any;
             }
+
+            curRoot.insertRule(d.value, d.path[d.path.length - 1]);
             break;
           case "node":
             for (let i = 0; i < d.path.length - 1; i++) {
-              if (!curRoot.cssRules[d.path[i] as number]) {
-                curRoot.insertRule(d.value as string, d.path[i]);
-                break;
-              } else {
-                curRoot = curRoot.cssRules[d.path[i] as number] as any;
-              }
+              curRoot = curRoot.cssRules[d.path[i] as number] as any;
             }
             const last = d.path[d.path.length - 1] as number;
             if (!d.value) {
               curRoot.deleteRule(last);
             } else {
+              if (curRoot.cssRules[last]) curRoot.deleteRule(last);
               curRoot.insertRule(d.value as string, last);
             }
             break;
