@@ -40,6 +40,11 @@ export function createDynamicStyleSheetHandlerFactory(
         ss.processDiffs(diffs);
         reset();
       },
+      add(values: postcss.CssInJs) {
+        const diffs = astInterface.addToNode(qpath, values, ast);
+        ss.processDiffs(diffs);
+        reset();
+      },
       get() {
         const n = astInterface.getNode(qpath, ast);
         return postcss.objectify(n);
