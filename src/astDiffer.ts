@@ -1,12 +1,18 @@
+import { postcss } from ".";
+import { AST, insertNode } from "./astInterface";
+import { cssInJs } from "./types";
+
 export type DiffNode = {
   type: "node";
   path: number[];
   value: string | null;
 };
+
+export type PropertiesObj = { [k in string]: string | null };
 export type DiffProperties = {
   type: "properties";
   path: number[];
-  value: { [k in string]: string | null };
+  value: PropertiesObj;
 };
 export type DiffRaw = { type: "raw"; path: number[]; value: string };
 
@@ -149,4 +155,71 @@ export function astDiff(
   }
 
   astDiff(lhs.nodes, rhs.nodes, path, result);
+}
+
+export function astAddDiffer(
+  n: any,
+  values: cssInJs,
+  path: number[],
+  diff: Diff[]
+) {
+  if (n.type === "rule") {
+    const properties: any = {};
+    let update = false;
+    const propDiff: PropertiesObj = {};
+    n.nodes.forEach((el: any, idx: number) => {
+      properties[el.prop as string] = { val: el.value, idx };
+    });
+
+    for (const [prop, val] of Object.entries(values)) {
+      if (!properties[prop]) {
+        update = true;
+        propDiff[prop] = val;
+        n.append(`${prop}: ${val};`);
+      } else if (properties[prop].val !== val) {
+        update = true;
+        propDiff[prop] = val;
+        n.nodes[properties[prop].idx].assign({ prop, value: val });
+      }
+    }
+    if (update) {
+      diff.push({ type: "properties", path: [...path], value: propDiff });
+    }
+  } else if (n.type === "atrule" || n.type === "root") {
+    for (let i = 0; i < n.nodes.length; i++) {
+      const selector = nodeToStringSelector(n.nodes[i]);
+
+      if (selector in values) {
+        const nVals = values[selector];
+        delete values[selector];
+        path.push(i);
+        astAddDiffer(n.nodes[i], nVals, path, diff);
+        path.pop();
+      }
+    }
+    const newNodes = postcss.parse(values);
+
+    for (let i = 0; i < newNodes.nodes.length; i++) {
+      const str = newNodes.nodes[i]?.toString();
+      const idx = insertNode(n, newNodes.nodes[i]);
+      diff.push({
+        type: "raw",
+        path: [...path, idx],
+        value: str as string,
+      });
+    }
+  }
+}
+
+// utils
+
+export function nodeToStringSelector(n: any) {
+  switch (n.type) {
+    case "atrule":
+      return `@${n.name} ${n.params}`;
+    case "rule":
+      return n.selector;
+    default:
+      throw new Error("Invalid node type to translate to selector text");
+  }
 }

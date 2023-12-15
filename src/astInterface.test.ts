@@ -1,8 +1,17 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { queryWalker, getNode, setNode, removeNode } from "./astInterface";
+import {
+  queryWalker,
+  getNode,
+  setNode,
+  removeNode,
+  addToNode,
+} from "./astInterface";
 import * as postcss from "postcss-js";
 import { vi } from "vitest";
 
+function normalizeString(s: any) {
+  return s.replaceAll(" ", "").replaceAll("\n", "");
+}
 describe("Query Walker", () => {
   const ast: any = postcss.parse({
     body: {
@@ -36,9 +45,6 @@ describe("Query Walker", () => {
   });
 });
 
-function normalizeString(s: any) {
-  return s.replaceAll(" ", "").replaceAll("\n", "");
-}
 describe("Get Node", () => {
   const ast = postcss.parse({
     body: {
@@ -173,5 +179,93 @@ describe("Set Node", () => {
     expect(normalizeString(diff[0]?.value)).toEqual(
       normalizeString(postcss.parse(newN).toString())
     );
+  });
+});
+
+describe("Add to Node", () => {
+  let ast: any;
+  beforeEach(() => {
+    ast = postcss.parse({
+      div: {
+        background: "red",
+        "z-index": "10",
+      },
+      "@media (max-width: 300px)": {
+        body: {
+          background: "red ",
+          "z-index": "10",
+        },
+      },
+    });
+  });
+
+  it("Should create the node if it doesn't exist", () => {
+    expect(ast.nodes[1].selector).toBeUndefined();
+    const n = {
+      body: {
+        background: "red",
+      },
+    };
+    const diff = addToNode([], ast, n);
+    expect(ast.nodes[1].selector).toBe("body");
+    expect(ast.nodes[1].nodes[0].prop).toBe("background");
+    expect(ast.nodes[1].nodes[0].value).toBe("red");
+    expect(diff[0]?.path).toEqual([1]);
+    expect(normalizeString(diff[0]?.value)).toBe(
+      normalizeString(postcss.parse(n).toString())
+    );
+  });
+
+  it("Should return empty diff array if no changes needed", () => {
+    const nodeOne = {
+      div: {
+        background: "red",
+        "z-index": "10",
+      },
+    };
+    const diff = addToNode([], ast, nodeOne);
+
+    expect(diff).toEqual([]);
+  });
+
+  it("Should create and update properties on existing nodes & return correct diff", () => {
+    const diff = addToNode(["@media (max-width: 300px)", "body"], ast, {
+      background: "blue",
+      color: "red",
+      "z-index": "10",
+    });
+    const obj = postcss.objectify(ast);
+    expect(obj["@media (max-width: 300px)"]["body"]).toEqual({
+      background: "blue",
+      color: "red",
+      zIndex: 10,
+    });
+    expect(diff[0]?.type).toBe("properties");
+    expect(diff[0]?.value).toEqual({ background: "blue", color: "red" });
+  });
+  it("Should create and update properties on existing nodes & return correct diff - ON NESTED NODES iN VALUES", () => {
+    const diff = addToNode([], ast, {
+      "@media (max-width: 300px)": {
+        body: {
+          background: "blue",
+        },
+        div: {
+          background: "red",
+        },
+      },
+    });
+    // diffs
+    expect(diff.length).toBe(2);
+    expect(diff[0]?.value).toEqual({ background: "blue" });
+    expect(normalizeString(diff[1]?.value)).toBe(
+      normalizeString(postcss.parse({ div: { background: "red" } }).toString())
+    );
+
+    // ast status
+    const obj = postcss.objectify(ast.nodes[1]);
+    expect(obj["body"].background).toBe("blue");
+    // didnt change
+    expect(obj["body"].zIndex).toBeDefined();
+    expect(obj["div"].background).toBe("red");
   });
 });
