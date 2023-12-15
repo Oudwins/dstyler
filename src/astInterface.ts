@@ -120,7 +120,7 @@ export function removeNode(qpath: string[], ast: AST) {
   return diff;
 }
 
-export function addToNode(qpath: string[], ast: AST, values: cssInJs) {
+export function addToNode(qpath: string[], values: cssInJs, ast: AST) {
   // problem 1: I can't just append the nodes I have to check that they do not currently exist and not do anything if they exist. Because otherwise even for properties it will just append multiple duplicates
   const path: number[] = [];
   const diff: Diff[] = [];
