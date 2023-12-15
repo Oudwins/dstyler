@@ -313,9 +313,25 @@ describe("Set node with Force", () => {
       )
     );
 
-    //
+    // ast updates
     expect(ast.nodes[1].nodes.length).toBe(1);
     expect(ast.nodes[1].nodes[0].selector).toBe("div");
     expect(postcss.objectify(ast.nodes[1].nodes[0])).toEqual(nodes.div);
+  });
+
+  it("Should replace properties with new values and return correct diff", () => {
+    const props = { background: "green" };
+    const diff = setNodeForce(["div"], props, ast);
+
+    // diff
+    expect(diff[0]?.type).toBe("node");
+    expect(diff[0]?.path).toEqual([0]);
+    expect(normalizeString(diff[0]?.value)).toBe(
+      normalizeString(postcss.parse({ div: props }).toString())
+    );
+
+    //
+    expect(ast.nodes[0].selector).toBe("div");
+    expect(postcss.objectify(ast.nodes[0])).toEqual(props);
   });
 });
