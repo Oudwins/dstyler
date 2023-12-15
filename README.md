@@ -97,6 +97,23 @@ ds.selector("div").set({ background: "blue", color: "white" }); // css is not up
 ds.media("(max-width: 300px)").set({ div: { background: "red" } }); // NOT RECOMENDED. May lead to unexpected behaviour.
 ```
 
+Add: adds value to a node (creates if it doesn't exist, updates if it does)
+
+```js
+// div {background: 'blue'; color: 'red'}
+ds.selector("div").add({ background: "red" }); // result -> div {background: 'red'; color: 'red'; }
+
+// div {background: 'blue'; color: 'red'}
+ds.selector("div").add({ background: "blue" }); // result -> no change
+
+// @media (max-width: 300px) {.original {background: 'red';}}
+ds.media("(max-width: 300px)").add({ div: { background: "red" } });
+// result -> @media (max-width: 300px) {.original {background: 'red';} div: {background: 'red';}}
+
+// Adding multiple "nodes" is supported
+ds.media(m).add({ div: { backgrund: "red" }, body: { background: "blue" } }); //supported
+```
+
 Delete: delete a node and its child nodes
 
 ```js
