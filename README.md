@@ -82,7 +82,7 @@ Get: Returns a css in js object for the nodes selected;
 ds.selector("div").get(); // {div: {background: "red"}}
 ```
 
-Set: sets the node to the provided value
+set(values): sets the node to the provided value
 The set function may be used to set nodes but this is not recomended as it may lead to unsupported behaviours -> ds.set({"div": {background: "red"}})
 
 ```js
@@ -97,7 +97,7 @@ ds.selector("div").set({ background: "blue", color: "white" }); // css is not up
 ds.media("(max-width: 300px)").set({ div: { background: "red" } }); // NOT RECOMENDED. May lead to unexpected behaviour.
 ```
 
-Add: adds value to a node (creates if it doesn't exist, updates if it does)
+add(values): adds value to a node (creates if it doesn't exist, updates if it does)
 
 ```js
 // div {background: 'blue'; color: 'red'}
@@ -114,11 +114,23 @@ ds.media("(max-width: 300px)").add({ div: { background: "red" } });
 ds.media(m).add({ div: { backgrund: "red" }, body: { background: "blue" } }); //supported
 ```
 
-Delete: delete a node and its child nodes
+delete(): delete a node and its child nodes
 
 ```js
 ds.selector("div").delete(); // deletes div{background: "red"}
 ds.media("(max-width: 300px)").delete(); //deletes media query & all nodes inside it!
+```
+
+**Opt out of diffing**
+This can be dangerous if you do not know what you are doing. Be warned.
+
+setForce(values): Set node to provided value
+If node doesn't exist it will be created. If it exists, the entire node will be nuked and recreated.
+
+```js
+// @media (max-width: 300px) {div{background: "blue";} ...many more stuff...}
+ds.media("(max-width: 300px)").setForce({ body: { background: "red" } });
+// result -> @media (max-width: 300px) {body {background: "red"}}
 ```
 
 ### Storing and Recovering the css
