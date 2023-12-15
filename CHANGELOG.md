@@ -1,5 +1,11 @@
 # dstyler
 
+## 0.1.2
+
+### Patch Changes
+
+- cf8d2da: Implemented add & setForce methods
+
 ## 0.1.1
 
 ### Patch Changes
