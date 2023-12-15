@@ -206,7 +206,7 @@ describe("Add to Node", () => {
         background: "red",
       },
     };
-    const diff = addToNode([], ast, n);
+    const diff = addToNode([], n, ast);
     expect(ast.nodes[1].selector).toBe("body");
     expect(ast.nodes[1].nodes[0].prop).toBe("background");
     expect(ast.nodes[1].nodes[0].value).toBe("red");
@@ -223,17 +223,21 @@ describe("Add to Node", () => {
         "z-index": "10",
       },
     };
-    const diff = addToNode([], ast, nodeOne);
+    const diff = addToNode([], nodeOne, ast);
 
     expect(diff).toEqual([]);
   });
 
   it("Should create and update properties on existing nodes & return correct diff", () => {
-    const diff = addToNode(["@media (max-width: 300px)", "body"], ast, {
-      background: "blue",
-      color: "red",
-      "z-index": "10",
-    });
+    const diff = addToNode(
+      ["@media (max-width: 300px)", "body"],
+      {
+        background: "blue",
+        color: "red",
+        "z-index": "10",
+      },
+      ast
+    );
     const obj = postcss.objectify(ast);
     expect(obj["@media (max-width: 300px)"]["body"]).toEqual({
       background: "blue",
@@ -244,16 +248,20 @@ describe("Add to Node", () => {
     expect(diff[0]?.value).toEqual({ background: "blue", color: "red" });
   });
   it("Should create and update properties on existing nodes & return correct diff - ON NESTED NODES iN VALUES", () => {
-    const diff = addToNode([], ast, {
-      "@media (max-width: 300px)": {
-        body: {
-          background: "blue",
-        },
-        div: {
-          background: "red",
+    const diff = addToNode(
+      [],
+      {
+        "@media (max-width: 300px)": {
+          body: {
+            background: "blue",
+          },
+          div: {
+            background: "red",
+          },
         },
       },
-    });
+      ast
+    );
     // diffs
     expect(diff.length).toBe(2);
     expect(diff[0]?.value).toEqual({ background: "blue" });
