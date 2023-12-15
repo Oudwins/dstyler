@@ -40,6 +40,14 @@ export function createDynamicStyleSheetHandlerFactory(
         ss.processDiffs(diffs);
         reset();
       },
+      setForce(values: postcss.CssInJs) {
+        if (qpath.length === 0)
+          throw new Error("cannot target root with setForce");
+
+        const diffs = astInterface.setNodeForce(qpath, values, ast);
+        ss.processDiffs(diffs);
+        reset();
+      },
       add(values: postcss.CssInJs) {
         const diffs = astInterface.addToNode(qpath, values, ast);
         ss.processDiffs(diffs);

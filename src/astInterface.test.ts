@@ -5,6 +5,7 @@ import {
   setNode,
   removeNode,
   addToNode,
+  setNodeForce,
 } from "./astInterface";
 import * as postcss from "postcss-js";
 import { vi } from "vitest";
@@ -275,5 +276,46 @@ describe("Add to Node", () => {
     // didnt change
     expect(obj["body"].zIndex).toBeDefined();
     expect(obj["div"].background).toBe("red");
+  });
+});
+
+describe("Set node with Force", () => {
+  let ast: any;
+  beforeEach(() => {
+    ast = postcss.parse({
+      div: {
+        background: "red",
+        color: "red",
+        "z-index": "10",
+      },
+      "@media (max-width: 300px)": {
+        body: {
+          background: "red ",
+        },
+        ".test": {
+          color: "red",
+        },
+      },
+    });
+  });
+
+  it("Should replace the previous child nodes for a @rule and return a node diff", () => {
+    const nodes = { div: { background: "red" } };
+
+    const diff = setNodeForce(["@media (max-width: 300px)"], nodes, ast);
+
+    // diff
+    expect(diff[0]?.type).toBe("node");
+    expect(diff[0]?.path).toEqual([1]);
+    expect(normalizeString(diff[0]?.value)).toBe(
+      normalizeString(
+        postcss.parse({ "@media (max-width: 300px)": nodes }).toString()
+      )
+    );
+
+    //
+    expect(ast.nodes[1].nodes.length).toBe(1);
+    expect(ast.nodes[1].nodes[0].selector).toBe("div");
+    expect(postcss.objectify(ast.nodes[1].nodes[0])).toEqual(nodes.div);
   });
 });

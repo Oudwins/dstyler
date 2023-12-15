@@ -1,5 +1,5 @@
 import * as postcss from "postcss-js";
-import { Diff, astAddDiffer, astDiff } from "./astDiffer";
+import { Diff, astAddDiffer, astDiff, nodeToStringSelector } from "./astDiffer";
 import { arrayToObject } from "./utils";
 import { cssInJs } from "./types";
 
@@ -90,13 +90,56 @@ export function setNode(qpath: string[], values: postcss.CssInJs, ast: AST) {
   if (diff.length > 0) {
     return diff;
   }
-  // handle case no created nodes in qpath. Only updated nodes for a node.
-  // all nodes in qpath exist
+  // all nodes in qpath exist || qpath is empty
   const nn = postcss.parse(values);
   // WARNING THIS IMPLEMENTATION WILL RESULT IN SS BEING OUT OF SYCH IF nn.nodes ARE IN DIFFERENT ORDER FROM n.nodes (in the case where they are not properties)
   // TODO fix this?
   astDiff(n.nodes, nn.nodes, path, diff);
 
+  return diff;
+}
+
+export function setNodeForce(
+  qpath: string[], // this can never be empty
+  values: postcss.CssInJs,
+  ast: AST
+) {
+  const path: number[] = [];
+  const diff: Diff[] = [];
+  const n = queryWalker(qpath, ast, (v) => {
+    if (v.nodeIdx < 0) {
+      // node does not exist
+      const pn = arrayToObject(qpath.slice(v.stepIdx), values);
+      // I have to parse the new node
+      const parentNode: any = postcss.parse(pn).nodes[0];
+
+      path.push(insertNode(v.curRoot, parentNode));
+      // I have to create a raw diff
+      diff.push({ type: "raw", path, value: parentNode.toString() });
+
+      // stops walker
+      return true;
+    }
+    path.push(v.nodeIdx);
+
+    return false;
+  });
+
+  if (diff.length > 0) {
+    return diff;
+  }
+  // remove all child nodes & repalce with newChild nodes
+  const newChildren = postcss.parse(values);
+
+  n.removeAll();
+  n.nodes = newChildren.nodes;
+
+  const selector = nodeToStringSelector(n);
+  diff.push({
+    type: "node",
+    path,
+    value: postcss.parse({ [selector]: values }).toString(),
+  });
   return diff;
 }
 
@@ -179,6 +222,7 @@ export function insertNode(root: AST, node: any): number {
 export default {
   getNode,
   setNode,
+  setNodeForce,
   addToNode,
   removeNode,
 };
