@@ -1,5 +1,11 @@
 # dstyler
 
+## 0.2.0
+
+### Minor Changes
+
+- 27a6f59: Changed API for createDynamicStylesheet, refactored a few internal functions
+
 ## 0.1.2
 
 ### Patch Changes
