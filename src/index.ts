@@ -1,7 +1,7 @@
 export * as postcss from "postcss-js";
 export * from "./userUtils";
 import { createDynamicStyleSheetHandlerFactory } from "./createDynamicStylesheet";
-import createDomInterface from "./createDomInterface";
+import createDomInterface from "./cssom";
 import astInterface from "./astInterface";
 import type { CreateDynamicStylesheet } from "./types";
 
