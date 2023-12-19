@@ -24,7 +24,11 @@ const initialState = {
 };
 
 // create a new dynamic stylesheet
-const ds = createDynamicStylesheet("stylesheet id", initialState, document);
+const ds = createDynamicStylesheet({
+  id: "stylesheet id",
+  doc: document,
+  initialState,
+});
 
 ds.media("(min-width: 640px)")
   .selector(".my-mobile-class")
@@ -42,11 +46,15 @@ This is a very early library, the api's might change fast. I am currently workin
 
 ```js
 // Creates a dynamic stylesheet instance
-export type CreateDynamicStylesheet = (
-  id: string,
-  initialState?: cssInJs,
-  doc?: Document
-) => DynamicStylesheet;
+export type CreateDynamicStylesheet = ({
+  id,
+  doc,
+  initialState,
+}: {
+  id: string; // unique stylesheet id
+  doc: Document | null; // required to mount stylesheet & for styles to work on page
+  initialState?: postcss.CssInJs; // initial state in postcss cssInJs format {".myclass": {background: "red"}}
+}) => DynamicStylesheet;
 ```
 
 ### Dynamic Stylesheet
@@ -56,10 +64,12 @@ export interface DynamicStylesheet {
   media: (params: string) => this;
   selector: (cssSelector: string) => this;
   set: (values: cssInJs) => void;
+  setForce: (values: cssInJs) => void;
+  add: (values: cssInJs) => void;
   delete: () => void;
   get: () => cssInJs;
-  _ast: any;
-  _ssInterface: any;
+  updateDocument: (doc: Document) => void; // set/update the document where the stylesheet is mounted
+  _ast: any; // postcss AST
 }
 ```
 
@@ -133,6 +143,20 @@ ds.media("(max-width: 300px)").setForce({ body: { background: "red" } });
 // result -> @media (max-width: 300px) {body {background: "red"}}
 ```
 
+### Mounting the Stylesheet on the DOM & Changing the mounted dom
+
+ds.updateDocument(doc): this is specially useful for working with iframes and such. See my section on integration with react
+
+```js
+import { createDynamicStylesheet, dsToJson } from "dstyler";
+
+const ds = createDynamicStylesheet({ id: "id", doc: document }); // stylesheet will be mounted on document automatically
+
+const ds2 = createDynamicStylesheet({ id: "id" }); // stylesheet NOT MOUNTED, css NOT on page
+ds2.selector(".myclass").set({ background: "red" });
+ds2.updateDocument(document); // now stylesheet will be mounted with the .myclass class
+```
+
 ### Storing and Recovering the css
 
 ```js
@@ -140,7 +164,7 @@ import { dsToJson, createDynamicStylesheet } from "dstyler";
 
 const jsonCSS = dsToJson(ds); // returns a json string that can be stored anywhere. This json string is a postcss AST. You may use it with postcss to create a css file.
 
-const ds = createDynamicStylesheet("id", JSON.parse(jsonCSS), document); // restored css
+const ds = createDynamicStylesheet("id", document, JSON.parse(jsonCSS)); // restored css
 
 const cssString = ds._ast.toString(); // returns entire stylesheet as a css string
 ```
@@ -149,7 +173,7 @@ const cssString = ds._ast.toString(); // returns entire stylesheet as a css stri
 
 - improve diffing algorithm to delete nodes if no children
 - Implement react hook that is compatible with react-frame-component
--
+- I don't like that the entire ast is serialized every time we check if new doc is needed. That is really bad. Need to find a way around it.
 
 ## Thank You's & Maintenance
 

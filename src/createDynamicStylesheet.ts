@@ -6,11 +6,15 @@ export function createDynamicStyleSheetHandlerFactory(
   cssom: typeof cssomI,
   astom: typeof astInterface
 ): any {
-  return function createDynamicStyleSheetHandler(
-    id: string,
-    doc?: Document,
-    initialState?: postcss.CssInJs
-  ) {
+  return function createDynamicStyleSheetHandler({
+    id,
+    doc,
+    initialState,
+  }: {
+    id: string;
+    doc: Document | null;
+    initialState?: postcss.CssInJs;
+  }) {
     const ast = postcss.parse(initialState || {});
     let ss: CSSStyleSheet | null = null;
     let dom: Document;

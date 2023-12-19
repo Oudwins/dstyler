@@ -13,8 +13,12 @@ export interface DynamicStylesheet {
   // _ss: CSSStyleSheet | null; // not currently working
 }
 
-export type CreateDynamicStylesheet = (
-  id: string,
-  doc?: Document,
-  initialState?: cssInJs
-) => DynamicStylesheet;
+export type CreateDynamicStylesheet = ({
+  id,
+  doc,
+  initialState,
+}: {
+  id: string;
+  doc: Document | null;
+  initialState?: postcss.CssInJs;
+}) => DynamicStylesheet;
