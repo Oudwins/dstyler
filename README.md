@@ -164,9 +164,13 @@ import { dsToJson, createDynamicStylesheet } from "dstyler";
 
 const jsonCSS = dsToJson(ds); // returns a json string that can be stored anywhere. This json string is a postcss AST. You may use it with postcss to create a css file.
 
-const ds = createDynamicStylesheet("id", document, JSON.parse(jsonCSS)); // restored css
+const ds2 = createDynamicStylesheet({
+  id: "id",
+  doc: document,
+  initialState: JSON.parse(jsonCSS),
+}); // restored css
 
-const cssString = ds._ast.toString(); // returns entire stylesheet as a css string
+const cssString = ds2._ast.toString(); // returns entire stylesheet as a css string
 ```
 
 ## Future improvements
