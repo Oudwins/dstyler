@@ -10,7 +10,7 @@ export interface DynamicStylesheet {
   get: () => cssInJs;
   updateDocument: (doc: Document) => void;
   _ast: any;
-  _ssInterface: any;
+  // _ss: CSSStyleSheet | null; // not currently working
 }
 
 export type CreateDynamicStylesheet = (

@@ -68,7 +68,7 @@ export function createDynamicStyleSheetHandlerFactory(
       },
       updateDocument,
       _ast: ast,
-      _ss: ss,
+      // _ss: ss,
     };
   };
 }
