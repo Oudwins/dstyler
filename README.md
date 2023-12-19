@@ -176,8 +176,7 @@ const cssString = ds2._ast.toString(); // returns entire stylesheet as a css str
 ## Future improvements
 
 - improve diffing algorithm to delete nodes if no children
-- Implement react hook that is compatible with react-frame-component
-- I don't like that the entire ast is serialized every time we check if new doc is needed. That is really bad. Need to find a way around it.
+- react compatibility?
 
 ## Thank You's & Maintenance
 
